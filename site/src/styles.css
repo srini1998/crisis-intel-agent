@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
-@import "@fontsource-variable/noto-sans-jp";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
 @theme {
