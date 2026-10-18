@@ -10,7 +10,7 @@ const SOURCES = [
 ];
 
 export function SourcesFooter({ status }: { status: FeedStatus[] }) {
-  const { t } = useT();
+  const { t, lang } = useT();
   return (
     <footer id="sources" className="scroll-mt-24 border-t border-line">
       <div className="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
@@ -28,7 +28,7 @@ export function SourcesFooter({ status }: { status: FeedStatus[] }) {
         </div>
         <p className="mt-14 max-w-[70ch] text-sm leading-relaxed text-muted">{t.limits}</p>
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 text-sm text-muted">
-          <span>{t.footer}</span>
+          <span>{t.footer}</span><a href="/THIRD_PARTY_NOTICES.txt">{lang === "ja" ? "モデル・ライセンス" : "Model & licenses"}</a>
           <a href="https://github.com/srini1998/crisis-intel-agent" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-ink">
             <GithubLogo size={16} aria-hidden /> srini1998/crisis-intel-agent
           </a>
