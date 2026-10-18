@@ -1,5 +1,7 @@
 # Crisis Intelligence Agent
 
+**Current public website:** [fieldbrief-xi.vercel.app](https://fieldbrief-xi.vercel.app). The interface is English-only and its main task requires no AI-weight download. See [current interface, datasets and execution boundaries](site/INTERFACE.md). The backend experiments and historical measurements below are separate from the current public UI.
+
 A monitor that pulls **live official disaster feeds**, links reports from different publishers into
 incidents, and has a local model write short situation reports. Every generated claim is checked for citation existence, numeric overlap and selected structured fields. **Those checks do not establish semantic entailment or factual truth.** The dashboard labels them as checks, rather than certified facts.
 
