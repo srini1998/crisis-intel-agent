@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/noto-sans-jp";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+@theme {
+  --font-sans: "Geist Variable", "Noto Sans JP Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-signal: var(--signal);
+  --color-green: #5fae7d;
+  --color-yellow: #cdb34a;
+  --color-orange: #e2853b;
+  --color-red: #d9534f;
+}
+
+:root {
+  --paper: #0e1214;
+  --panel: #151b1e;
+  --line: #263034;
+  --ink: #e8edef;
+  --muted: #95a3aa;
+  --signal: #e8763a;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --paper: #f3f5f6;
+    --panel: #ffffff;
+    --line: #d7dde0;
+    --ink: #13191c;
+    --muted: #55636a;
+    --signal: #c4581f;
+    color-scheme: light;
+  }
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:lang(ja) body { line-height: 1.75; }
+::selection { background: var(--signal); color: #fff; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+.maplibregl-ctrl-attrib { font-size: 10px; }
+.maplibregl-popup-content { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; font-family: var(--font-sans); }
+.maplibregl-popup-tip { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
