@@ -1,0 +1,86 @@
+"""Dashboard and JSON API over the local store. Only verified facts are shown as facts;
+facts the verifier rejected are listed separately with the reason."""
+
+from __future__ import annotations
+
+import html
+import os
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+
+from .agent import Agent
+
+app = FastAPI(title="Crisis intelligence agent")
+_agent: Agent | None = None
+
+
+def agent() -> Agent:
+    global _agent
+    if _agent is None:
+        _agent = Agent(Path(os.environ.get("CRISIS_STATE", "state")))
+    return _agent
+
+
+def _view(inc: dict) -> dict:
+    a = agent()
+    docs = a.members(inc)
+    llm = a.store.report(inc["incident_id"], inc["members_hash"], "llm")
+    base = a.store.report(inc["incident_id"], inc["members_hash"], "baseline")
+    return {**inc, "documents": [{"n": i, "source": d.source, "title": d.title, "time": d.time, "url": d.url}
+                                 for i, d in enumerate(docs, 1)], "llm": llm, "baseline": base}
+
+
+@app.get("/incidents")
+def incidents(limit: int = 50) -> list[dict]:
+    return [_view(i) for i in agent().store.incidents()[:limit]]
+
+
+@app.get("/incidents/{incident_id}")
+def incident(incident_id: str) -> dict:
+    for i in agent().store.incidents():
+        if i["incident_id"] == incident_id:
+            return _view(i)
+    raise HTTPException(404, "unknown incident")
+
+
+@app.get("/ask")
+def ask(q: str) -> dict:
+    if not 3 <= len(q) <= 300:
+        raise HTTPException(422, "question must be 3-300 characters")
+    return agent().ask(q)
+
+
+@app.get("/", response_class=HTMLResponse)
+def index() -> str:
+    e = html.escape
+    cards = []
+    for inc in incidents(limit=25):
+        llm = inc["llm"]
+        body = "<p class=muted>No report yet for this version of the incident.</p>"
+        if llm:
+            rep, ver = llm["report"], llm["verification"]
+            good = [f for f in ver["facts"] if f["ok"]]
+            bad = [f for f in ver["facts"] if not f["ok"]]
+            badge = "verified" if ver["passed"] else "partly verified"
+            body = (f"<h3>{e(rep['headline'])} <span class='badge {'ok' if ver['passed'] else 'warn'}'>{badge}</span></h3>"
+                    f"<p>Alert: <b>{e(rep['alert_level'])}</b>"
+                    + ("" if ver["alert"]["ok"] else f" <span class=warn>(sources say {e(ver['alert']['expected'])})</span>")
+                    + "</p><ul>" + "".join(f"<li>{e(f['text'])} <sup>{','.join(map(str, f['citations']))}</sup></li>" for f in good)
+                    + "</ul>")
+            if bad:
+                body += "<details><summary>Rejected by the verifier</summary><ul>" + "".join(
+                    f"<li><s>{e(f['text'])}</s> - {e('; '.join(f['problems']))}</li>" for f in bad) + "</ul></details>"
+        srcs = "".join(f"<li>[{d['n']}] <a href='{e(d['url'])}' rel=noopener>{e(d['source'].upper())}: {e(d['title'])}</a> "
+                       f"<span class=muted>{e(d['time'])}</span></li>" for d in inc["documents"])
+        cards.append(f"<article><small>{e(inc['hazard'].replace('_', ' '))} · {len(inc['documents'])} source document(s)</small>"
+                     f"{body}<ol class=src>{srcs}</ol></article>")
+    return ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+            "<title>Crisis monitor</title><style>body{font:15px/1.5 system-ui;margin:0 auto;max-width:900px;padding:1rem;"
+            "background:#f6f5f1;color:#1d1d1b}article{background:#fff;border:1px solid #ddd;border-radius:8px;padding:1rem;"
+            "margin:1rem 0}h3{margin:.3rem 0}.badge{font-size:.75rem;padding:.1rem .4rem;border-radius:4px}.ok{background:#d8f0d2}"
+            ".warn{background:#fbe3c8}.muted{color:#777}.src{font-size:.85rem}sup{color:#555}</style>"
+            "<h1>Crisis monitor</h1><p class=muted>Live official feeds (USGS, GDACS, NASA EONET, NWS) linked into incidents. "
+            "Reports are written by a local model; every fact is checked against the documents it cites. "
+            "Not an official warning service.</p>" + "".join(cards))

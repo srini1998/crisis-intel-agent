@@ -1,0 +1,15 @@
+{
+  "fetched_at": "2026-10-18T02:17:33Z",
+  "feeds": {
+    "usgs": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson",
+    "gdacs": "https://www.gdacs.org/gdacsapi/api/events/geteventlist/EVENTS4APP",
+    "eonet": "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=14",
+    "nws": "https://api.weather.gov/alerts/active?severity=Extreme,Severe"
+  },
+  "counts": {
+    "usgs": 118,
+    "gdacs": 100,
+    "eonet": 27,
+    "nws": 44
+  }
+}
