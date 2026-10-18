@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import time
+import threading
 from dataclasses import asdict
 from pathlib import Path
 
@@ -29,9 +30,20 @@ create table if not exists reports (
 class Store:
     def __init__(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = sqlite3.connect(path)
-        self.db.row_factory = sqlite3.Row
+        self.path = path
+        self._thread = threading.local()
         self.db.executescript(SCHEMA)
+
+    @property
+    def db(self):
+        # FastAPI sync handlers may run on different pool threads. Each thread owns
+        # its connection; never share a check_same_thread connection across them.
+        if not hasattr(self._thread, "connection"):
+            conn=sqlite3.connect(self.path, timeout=10)
+            conn.row_factory=sqlite3.Row
+            conn.execute("pragma journal_mode=WAL")
+            self._thread.connection=conn
+        return self._thread.connection
 
     def upsert(self, docs: list[Doc]) -> dict[str, int]:
         """Insert new documents, record new versions of changed ones. Returns counts."""

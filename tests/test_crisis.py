@@ -109,3 +109,29 @@ def test_sanitizer_quarantines_instruction_sentences_but_not_ordinary_text():
 
 def test_citation_markers_are_not_numeric_claims():
     assert verify.numbers("Magnitude 6.1 [2] near the coast [1, 3].") == [6.1]
+
+
+def test_boolean_is_not_a_citation_identifier():
+    docs=[quake("usgs","x",6.1,10.,20.)]
+    payload={"headline":"earthquake","hazard":"earthquake","location":"Testville","alert_level":"unknown","key_facts":[{"text":"Magnitude 6.1.","citations":[True]}]}
+    checked=verify.verify(payload,docs,"earthquake")
+    assert not checked["passed"]
+
+def test_passing_overlap_checks_does_not_claim_semantic_truth():
+    docs=[quake("usgs","x",6.1,10.,20.)]
+    payload={"headline":"earthquake","hazard":"earthquake","location":"Testville","alert_level":"unknown","key_facts":[{"text":"Unrelated imaginary claims are not validated by citation presence.","citations":[1]}]}
+    checked=verify.verify(payload,docs,"earthquake")
+    assert checked["passed"]  # An honest boundary: no semantic entailment check exists.
+    assert checked["factual_verification"]=="not_established"
+    assert checked["facts"][0]["factual_status"]=="unverified_generated_claim"
+
+def test_dashboard_store_supports_reading_from_distinct_pool_threads(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    store=Store(tmp_path/"threaded.sqlite");store.upsert([quake("usgs","x",6.1,10.,20.)])
+    gate=threading.Barrier(2)
+    def read():
+        gate.wait(timeout=5);return [d.doc_id for d in store.docs()]
+    with ThreadPoolExecutor(max_workers=2)as pool:
+        a=pool.submit(read);b=pool.submit(read)
+        assert a.result()==b.result()==["x"]

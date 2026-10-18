@@ -1,4 +1,4 @@
-"""Independent, deterministic verification of a situation report against its source documents.
+"""Deterministic citation/field checks; these are not semantic truth verification.
 
 The model never grades itself. Each check is a rule over the report JSON and the exact
 documents it was given:
@@ -60,7 +60,7 @@ def verify(report: dict, docs: list[Doc], hazard: str) -> dict:
     for fact in report.get("key_facts", []):
         problems = []
         cites = fact.get("citations") or []
-        valid = [c for c in cites if isinstance(c, int) and 1 <= c <= len(docs)]
+        valid = [c for c in cites if type(c) is int and 1 <= c <= len(docs)]
         if not cites:
             problems.append("no citation")
         if len(valid) != len(cites):
@@ -69,7 +69,7 @@ def verify(report: dict, docs: list[Doc], hazard: str) -> dict:
         unsupported = [n for n in numbers(fact.get("text", "")) if not _num_supported(n, cited)]
         if unsupported:
             problems.append(f"numbers not found in the cited documents: {unsupported}")
-        facts_out.append({"text": fact.get("text", ""), "citations": cites, "ok": not problems, "problems": problems})
+        facts_out.append({"text": fact.get("text", ""), "citations": cites, "ok": not problems, "problems": problems, "factual_status": "unverified_generated_claim"})
 
     expected_alert = max_alert(docs)
     alert_ok = report.get("alert_level") == expected_alert
@@ -80,6 +80,8 @@ def verify(report: dict, docs: list[Doc], hazard: str) -> dict:
     hazard_ok = bool(stated & HAZARD_WORDS.get(hazard, {hazard}))
     n_ok = sum(f["ok"] for f in facts_out)
     return {
+        "scope": "Citation, numeric-overlap and structured-field checks only; not semantic entailment or factual truth",
+        "factual_verification": "not_established",
         "facts": facts_out,
         "fact_count": len(facts_out),
         "facts_grounded": n_ok,
