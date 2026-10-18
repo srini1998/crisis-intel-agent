@@ -1,6 +1,6 @@
 // Incident linking, input sanitizing, the deterministic baseline brief and the claim verifier.
 // Ported from crisis/link.py, crisis/sanitize.py, crisis/report.py and crisis/verify.py.
-import { ALERT_ORDER, type Doc, type Hazard } from "./feeds";
+import { ALERT_ORDER, type Doc, type Hazard } from "./feeds.ts";
 
 const WINDOWS: Partial<Record<Hazard, [number, number]>> = {
   earthquake: [100, 24], cyclone: [600, 168], wildfire: [40, 336], volcano: [30, 720], flood: [300, 336], drought: [800, 1440],
@@ -58,7 +58,7 @@ export function link(docs: Doc[]): Incident[] {
   }).sort((a, b) => b.severity - a.severity);
 }
 
-// Sanitizer: a heuristic first layer. Paraphrased instructions can slip past; the verifier is the layer that holds.
+// Sanitizer: a heuristic first layer. Paraphrased instructions can slip past; citation/number checks are limited too and do not establish factuality.
 const PATTERNS = [
   /\b(ignore|disregard|forget|override)\b[^.]{0,40}\b(previous|prior|above|all|earlier|system)\b[^.]{0,40}\b(instructions?|prompts?|rules?|messages?)\b/i,
   /\b(system|developer|admin(istrator)?)\s+(notice|message|prompt|instruction|override)\b/i,
@@ -105,12 +105,12 @@ export const numbersIn = (t: string) => (t.replace(CITE, " ").replace(IDENT, " "
 const haystack = (d: Doc) => [d.title, d.text, d.time, JSON.stringify(d.facts)].join(" ");
 
 export type CheckedFact = Fact & { ok: boolean; problems: string[] };
-export type Verification = { facts: CheckedFact[]; alertOk: boolean; expectedAlert: string; passed: boolean };
+export type Verification = { facts: CheckedFact[]; alertOk: boolean; expectedAlert: string; factualVerification: "not_established"; passed: boolean };
 
 export function verify(r: Report, docs: Doc[]): Verification {
   const facts = r.facts.map((f) => {
     const problems: string[] = [];
-    const valid = f.citations.filter((c) => c >= 1 && c <= docs.length);
+    const valid = f.citations.filter((c) => Number.isInteger(c) && c >= 1 && c <= docs.length);
     if (!f.citations.length) problems.push("no citation");
     if (valid.length !== f.citations.length) problems.push("cites a document that does not exist");
     const cited = valid.map((c) => docs[c - 1]);
@@ -120,7 +120,7 @@ export function verify(r: Report, docs: Doc[]): Verification {
   });
   const expectedAlert = maxAlert(docs);
   const alertOk = r.alert_level === expectedAlert;
-  return { facts, alertOk, expectedAlert, passed: facts.length > 0 && facts.every((f) => f.ok) && alertOk };
+  return { facts, alertOk, expectedAlert, factualVerification: "not_established", passed: facts.length > 0 && facts.every((f) => f.ok) && alertOk };
 }
 
 /** Parse the small model's line format: HEADLINE:, FACT: ... [n], ALERT:, WATCH: */
