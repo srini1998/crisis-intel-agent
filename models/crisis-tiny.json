@@ -1,0 +1,94 @@
+{
+  "snapshot": "2026-10-18T0217Z",
+  "seed": 0,
+  "params": 3683840,
+  "config": {
+    "snapshot": "snapshots/2026-10-18T0217Z",
+    "out": "models/crisis-tiny.pt",
+    "steps": 600,
+    "batch": 8,
+    "lr": 0.001,
+    "d_model": 256,
+    "layers": 4,
+    "seed": 0
+  },
+  "train_incidents": 152,
+  "best_val_loss": 1.3824,
+  "heldout_incidents": [
+    "781e5bcadd5d",
+    "9bbec95327d9",
+    "549561a35532",
+    "b05bbece8c2b",
+    "d0d7105dd43a",
+    "83fcc34193af",
+    "fc3fb87396cd",
+    "47a428716cf2",
+    "b29f1fc957ee",
+    "842637f0a962",
+    "66965b9b273a",
+    "d8adb32b5706",
+    "f48e864ef86a",
+    "83cff958341a",
+    "3e466ee8ac13",
+    "a9cfe3d50f4a",
+    "e02378901661",
+    "ade5a66d8e31",
+    "16cd239c21f6",
+    "0dc279d0caa9",
+    "b4b716964ada",
+    "f9b6adb27763",
+    "07ba292b4599",
+    "5fcba7be47ac",
+    "c182b9ccec0a",
+    "b56f5a71d04f",
+    "e6e697475327",
+    "04888d2f3222",
+    "7d1c65b5777b",
+    "e7304632ba7f",
+    "73341784e8bb",
+    "3625fe860d4b",
+    "f0a98aeccbd5",
+    "c3fe5e97b0c2",
+    "40effc1a1593",
+    "ace2b7998612",
+    "cdfd7385e593"
+  ],
+  "log": [
+    {
+      "step": 100,
+      "train_loss": 1.465,
+      "val_loss": 1.9136,
+      "seconds": 163
+    },
+    {
+      "step": 200,
+      "train_loss": 0.8323,
+      "val_loss": 1.5081,
+      "seconds": 300
+    },
+    {
+      "step": 300,
+      "train_loss": 0.5237,
+      "val_loss": 1.3852,
+      "seconds": 440
+    },
+    {
+      "step": 400,
+      "train_loss": 0.2581,
+      "val_loss": 1.3824,
+      "seconds": 583
+    },
+    {
+      "step": 500,
+      "train_loss": 0.093,
+      "val_loss": 1.4703,
+      "seconds": 727
+    },
+    {
+      "step": 600,
+      "train_loss": 0.0801,
+      "val_loss": 1.5157,
+      "seconds": 877
+    }
+  ]
+}

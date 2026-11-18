@@ -1,0 +1,7 @@
+params=3,683,840 train=152 val=37
+{'step': 100, 'train_loss': 1.465, 'val_loss': 1.9136, 'seconds': 163}
+{'step': 200, 'train_loss': 0.8323, 'val_loss': 1.5081, 'seconds': 300}
+{'step': 300, 'train_loss': 0.5237, 'val_loss': 1.3852, 'seconds': 440}
+{'step': 400, 'train_loss': 0.2581, 'val_loss': 1.3824, 'seconds': 583}
+{'step': 500, 'train_loss': 0.093, 'val_loss': 1.4703, 'seconds': 727}
+{'step': 600, 'train_loss': 0.0801, 'val_loss': 1.5157, 'seconds': 877}

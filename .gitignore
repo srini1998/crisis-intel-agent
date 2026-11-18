@@ -4,3 +4,4 @@ __pycache__/
 state/
 snapshots/*/gdacs.json
 state-eval.log
+models/*.pt

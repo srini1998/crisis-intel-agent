@@ -92,6 +92,15 @@ uv run crisis eval snapshots/2026-10-18T0217Z    # needs GDACS in the snapshot: 
 uv run pytest
 ```
 
+## Serving engine
+
+`crisis/engine/` is an LLM inference server built from scratch for this agent: paged KV cache,
+continuous batching with chunked prefill and preemption, JSON-schema-constrained decoding, and
+Ollama and OpenAI compatible APIs, so the agent runs against it unchanged. On 37 held-out
+incidents, constrained decoding took schema-valid output from 2.7% to 100%; at 8 requests per
+second, continuous batching cut median time to first token from 1.94 s to 0.11 s. Design,
+results and limits: [docs/engine.md](docs/engine.md).
+
 ## Limits
 
 Not an official warning service. Reports summarize what the publishers say, with no casualty
